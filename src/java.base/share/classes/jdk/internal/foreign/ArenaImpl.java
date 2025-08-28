@@ -30,6 +30,8 @@ import java.lang.foreign.MemorySegment.Scope;
 
 public final class ArenaImpl implements Arena {
 
+    static long dummyLong = 0;
+
     private final MemorySessionImpl session;
     private final boolean shouldReserveMemory;
     ArenaImpl(MemorySessionImpl session) {
@@ -53,6 +55,8 @@ public final class ArenaImpl implements Arena {
 
     @Override
     public NativeMemorySegmentImpl allocate(long byteSize, long byteAlignment) {
-        return SegmentFactories.allocateNativeSegment(byteSize, byteAlignment, session, shouldReserveMemory, true);
+        NativeMemorySegmentImpl returnSegment = SegmentFactories.allocateNativeSegment(byteSize, byteAlignment, session, shouldReserveMemory, true);
+        dummyLong += returnSegment.address();
+        return returnSegment;
     }
 }

@@ -121,9 +121,11 @@ public final class BufferStack {
 
         static PerThread of(long byteSize, long byteAlignment) {
             final Arena arena = Arena.ofAuto();
+            SlicingAllocator slicingAllocatorObj = new SlicingAllocator(arena.allocate(byteSize, byteAlignment));
+            slicingAllocatorObj.canAllocate(1024,1);
             return new PerThread(new ReentrantLock(),
                     arena,
-                    new SlicingAllocator(arena.allocate(byteSize, byteAlignment)),
+                    slicingAllocatorObj,
                     new CleanupAction(arena));
         }
 
