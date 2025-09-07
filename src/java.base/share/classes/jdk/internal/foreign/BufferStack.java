@@ -107,6 +107,7 @@ public final class BufferStack {
 
         @ForceInline
         public Arena pushFrame(long size, long byteAlignment) {
+            stack.checkSegment();
             boolean needsLock = Thread.currentThread().isVirtual() && !lock.isHeldByCurrentThread();
             if (needsLock && !lock.tryLock()) {
                 // Rare: another virtual thread on the same carrier competed for acquisition.
@@ -121,9 +122,11 @@ public final class BufferStack {
 
         static PerThread of(long byteSize, long byteAlignment) {
             final Arena arena = Arena.ofAuto();
+            SlicingAllocator slicingAllocatorObj = new SlicingAllocator(arena.allocate(byteSize, byteAlignment));
+            slicingAllocatorObj.checkSegment();
             return new PerThread(new ReentrantLock(),
                     arena,
-                    new SlicingAllocator(arena.allocate(byteSize, byteAlignment)),
+                    slicingAllocatorObj,
                     new CleanupAction(arena));
         }
 

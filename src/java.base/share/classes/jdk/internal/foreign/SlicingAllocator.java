@@ -34,6 +34,8 @@ public final class SlicingAllocator implements SegmentAllocator {
 
     private long sp = 0L;
 
+    static long dummyLong = 0;
+
     public SlicingAllocator(MemorySegment segment) {
         this.segment = segment;
     }
@@ -67,5 +69,9 @@ public final class SlicingAllocator implements SegmentAllocator {
         Utils.checkAllocationSizeAndAlign(byteSize, byteAlignment);
         // try to slice from current segment first...
         return trySlice(byteSize, byteAlignment);
+    }
+
+    public final void checkSegment() {
+        dummyLong += ((AbstractMemorySegmentImpl)segment).intObj.intValue();
     }
 }
