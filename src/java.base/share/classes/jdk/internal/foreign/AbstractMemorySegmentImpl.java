@@ -77,11 +77,15 @@ public abstract sealed class AbstractMemorySegmentImpl
     final boolean readOnly;
     final MemorySessionImpl scope;
 
+    public final Integer intObj;
+
     @ForceInline
     AbstractMemorySegmentImpl(long length, boolean readOnly, MemorySessionImpl scope) {
         this.length = length;
         this.readOnly = readOnly;
         this.scope = scope;
+
+        this.intObj = Integer.valueOf(1024);
     }
 
     abstract AbstractMemorySegmentImpl dup(long offset, long size, boolean readOnly, MemorySessionImpl scope);
