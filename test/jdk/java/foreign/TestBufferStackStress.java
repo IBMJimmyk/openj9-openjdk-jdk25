@@ -46,27 +46,39 @@ public class TestBufferStackStress {
     @Test
     public void stress() throws InterruptedException {
         BufferStack stack = BufferStack.of(256, 1);
+        stack.checkSegment();
         Thread[] vThreads = IntStream.range(0, 1024).mapToObj(_ ->
                 Thread.ofVirtual().start(() -> {
+                    stack.checkSegment();
                     long threadId = Thread.currentThread().threadId();
                     while (!Thread.interrupted()) {
+                        stack.checkSegment();
                         for (int i = 0; i < 1_000_000; i++) {
+                            stack.checkSegment();
                             try (Arena arena = stack.pushFrame(JAVA_LONG.byteSize(), JAVA_LONG.byteAlignment())) {
                                 // Try to assert no two vThreads get allocated the same stack space.
+                                stack.checkSegment();
                                 MemorySegment segment = arena.allocate(JAVA_LONG);
+                                stack.checkSegment();
                                 JAVA_LONG.varHandle().setVolatile(segment, 0L, threadId);
+                                stack.checkSegment();
                                 assertEquals(threadId, (long) JAVA_LONG.varHandle().getVolatile(segment, 0L));
+                                stack.checkSegment();
                             }
+                            stack.checkSegment();
                         }
                         Thread.yield(); // make sure the driver thread gets a chance.
                     }
                 })).toArray(Thread[]::new);
+        stack.checkSegment();
         Thread.sleep(Duration.of(10, SECONDS));
+        stack.checkSegment();
         Arrays.stream(vThreads).forEach(
                 thread -> {
                     assertTrue(thread.isAlive());
                     thread.interrupt();
                 });
+        stack.checkSegment();
     }
 
 }

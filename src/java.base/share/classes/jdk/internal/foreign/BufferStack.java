@@ -61,6 +61,10 @@ public final class BufferStack {
         };
     }
 
+    public final void checkSegment() {
+        tl.get().checkSegment();
+    }
+
     /**
      * {@return a new Arena that tries to provide {@code byteSize} and {@code byteAlignment}
      *          allocations by recycling the BufferStack's internal memory}
@@ -118,6 +122,10 @@ public final class BufferStack {
                 return Arena.ofConfined();
             }
             return new Frame(needsLock, size, byteAlignment);
+        }
+
+        public void checkSegment() {
+            stack.checkSegment();
         }
 
         static PerThread of(long byteSize, long byteAlignment) {
