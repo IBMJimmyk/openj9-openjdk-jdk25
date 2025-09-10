@@ -36,8 +36,6 @@ import java.lang.ref.Reference;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * A buffer stack that allows efficient reuse of memory segments. This is useful in cases
  * where temporary memory is needed.
@@ -52,9 +50,6 @@ public final class BufferStack {
     private final long byteAlignment;
     private final CarrierThreadLocal<PerThread> tl;
 
-    public static final ConcurrentHashMap<SlicingAllocator, SlicingAllocator> allocationHashMapObj = new ConcurrentHashMap<>(65536);
-    public static final ConcurrentHashMap<MemorySegment, MemorySegment> segmentHashMapObj = new ConcurrentHashMap<>(65536);
-
     private BufferStack(long byteSize, long byteAlignment) {
         this.byteSize = byteSize;
         this.byteAlignment = byteAlignment;
@@ -66,8 +61,8 @@ public final class BufferStack {
         };
     }
 
-    public final void checkSegment() {
-        tl.get().checkSegment();
+    public final void checkSegment(int idNum) {
+        tl.get().checkSegment(idNum);
     }
 
     /**
@@ -116,7 +111,7 @@ public final class BufferStack {
 
         @ForceInline
         public Arena pushFrame(long size, long byteAlignment) {
-            stack.checkSegment();
+            stack.checkSegment(0xFEFE0010);
             boolean needsLock = Thread.currentThread().isVirtual() && !lock.isHeldByCurrentThread();
             if (needsLock && !lock.tryLock()) {
                 // Rare: another virtual thread on the same carrier competed for acquisition.
@@ -129,16 +124,14 @@ public final class BufferStack {
             return new Frame(needsLock, size, byteAlignment);
         }
 
-        public void checkSegment() {
-            stack.checkSegment();
+        public void checkSegment(int idNum) {
+            stack.checkSegment(idNum);
         }
 
         static PerThread of(long byteSize, long byteAlignment) {
             final Arena arena = Arena.ofAuto();
             SlicingAllocator slicingAllocatorObj = new SlicingAllocator(arena.allocate(byteSize, byteAlignment));
-            slicingAllocatorObj.checkSegment();
-            //allocationHashMapObj.put(slicingAllocatorObj, slicingAllocatorObj);
-            //segmentHashMapObj.put(slicingAllocatorObj.getSegment(), slicingAllocatorObj.getSegment());
+            slicingAllocatorObj.checkSegment(0xFEFE0011);
             return new PerThread(new ReentrantLock(),
                     arena,
                     slicingAllocatorObj,
