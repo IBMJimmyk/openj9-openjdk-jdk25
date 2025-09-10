@@ -31,9 +31,6 @@ import java.lang.foreign.SegmentAllocator;
 public final class SlicingAllocator implements SegmentAllocator {
 
     private final MemorySegment segment;
-    private final MemorySegment segmentBackup1;
-    private final MemorySegment segmentBackup2;
-    private final MemorySegment segmentBackup3;
 
     private long sp = 0L;
 
@@ -41,9 +38,6 @@ public final class SlicingAllocator implements SegmentAllocator {
 
     public SlicingAllocator(MemorySegment segment) {
         this.segment = segment;
-        this.segmentBackup1 = segment;
-        this.segmentBackup2 = segment;
-        this.segmentBackup3 = segment;
     }
 
     public long currentOffset() {
