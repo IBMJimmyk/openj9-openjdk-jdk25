@@ -137,8 +137,8 @@ public final class BufferStack {
             final Arena arena = Arena.ofAuto();
             SlicingAllocator slicingAllocatorObj = new SlicingAllocator(arena.allocate(byteSize, byteAlignment));
             slicingAllocatorObj.checkSegment();
-            allocationHashMapObj.put(slicingAllocatorObj, slicingAllocatorObj);
-            segmentHashMapObj.put(slicingAllocatorObj.getSegment(), slicingAllocatorObj.getSegment());
+            //allocationHashMapObj.put(slicingAllocatorObj, slicingAllocatorObj);
+            //segmentHashMapObj.put(slicingAllocatorObj.getSegment(), slicingAllocatorObj.getSegment());
             return new PerThread(new ReentrantLock(),
                     arena,
                     slicingAllocatorObj,
