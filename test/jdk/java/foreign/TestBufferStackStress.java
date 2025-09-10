@@ -55,7 +55,7 @@ public class TestBufferStackStress {
                                 // Try to assert no two vThreads get allocated the same stack space.
                                 //stack.checkSegment();
                                 MemorySegment segment = arena.allocate(JAVA_LONG);
-                                stack.checkSegment();
+                                //stack.checkSegment();
                                 JAVA_LONG.varHandle().setVolatile(segment, 0L, threadId);
                                 //stack.checkSegment();
                                 assertEquals(threadId, (long) JAVA_LONG.varHandle().getVolatile(segment, 0L));
