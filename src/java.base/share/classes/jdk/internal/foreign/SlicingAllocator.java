@@ -80,4 +80,8 @@ public final class SlicingAllocator implements SegmentAllocator {
     public final void checkSegment() {
         dummyLong += ((AbstractMemorySegmentImpl)segment).intObj.intValue();
     }
+
+    public MemorySegment getSegment() {
+        return segment;
+    }
 }

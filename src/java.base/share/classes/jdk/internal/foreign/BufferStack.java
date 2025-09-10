@@ -36,6 +36,8 @@ import java.lang.ref.Reference;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * A buffer stack that allows efficient reuse of memory segments. This is useful in cases
  * where temporary memory is needed.
@@ -49,6 +51,9 @@ public final class BufferStack {
     private final long byteSize;
     private final long byteAlignment;
     private final CarrierThreadLocal<PerThread> tl;
+
+    public static final ConcurrentHashMap<SlicingAllocator, SlicingAllocator> allocationHashMapObj = new ConcurrentHashMap<>(65536);
+    public static final ConcurrentHashMap<MemorySegment, MemorySegment> segmentHashMapObj = new ConcurrentHashMap<>(65536);
 
     private BufferStack(long byteSize, long byteAlignment) {
         this.byteSize = byteSize;
@@ -132,6 +137,8 @@ public final class BufferStack {
             final Arena arena = Arena.ofAuto();
             SlicingAllocator slicingAllocatorObj = new SlicingAllocator(arena.allocate(byteSize, byteAlignment));
             slicingAllocatorObj.checkSegment();
+            allocationHashMapObj.put(slicingAllocatorObj, slicingAllocatorObj);
+            segmentHashMapObj.put(slicingAllocatorObj.getSegment(), slicingAllocatorObj.getSegment());
             return new PerThread(new ReentrantLock(),
                     arena,
                     slicingAllocatorObj,
