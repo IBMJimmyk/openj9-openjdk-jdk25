@@ -36,6 +36,8 @@ import java.lang.ref.Reference;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * A buffer stack that allows efficient reuse of memory segments. This is useful in cases
  * where temporary memory is needed.
@@ -49,6 +51,11 @@ public final class BufferStack {
     private final long byteSize;
     private final long byteAlignment;
     private final CarrierThreadLocal<PerThread> tl;
+
+    public static final AtomicInteger nextId = new AtomicInteger();
+
+    public static final SlicingAllocator[] allocatorArray = new SlicingAllocator[65536];
+    public static final MemorySegment[]    segmentArray   = new MemorySegment[65536];
 
     private BufferStack(long byteSize, long byteAlignment) {
         this.byteSize = byteSize;
@@ -130,8 +137,11 @@ public final class BufferStack {
 
         static PerThread of(long byteSize, long byteAlignment) {
             final Arena arena = Arena.ofAuto();
-            SlicingAllocator slicingAllocatorObj = new SlicingAllocator(arena.allocate(byteSize, byteAlignment));
+            int saveID = nextId.getAndIncrement();
+            SlicingAllocator slicingAllocatorObj = new SlicingAllocator(saveID, arena.allocate(byteSize, byteAlignment));
             slicingAllocatorObj.checkSegment(0xFEFE0011);
+            allocatorArray[saveID & 0xFFFF] = slicingAllocatorObj;
+            segmentArray[saveID & 0xFFFF]   = slicingAllocatorObj.getSegment();
             return new PerThread(new ReentrantLock(),
                     arena,
                     slicingAllocatorObj,

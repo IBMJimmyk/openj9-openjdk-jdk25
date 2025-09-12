@@ -36,8 +36,16 @@ public final class SlicingAllocator implements SegmentAllocator {
 
     static long dummyLong = 0;
 
+    private final int arrayID;
+
+    public SlicingAllocator(int inputArrayID, MemorySegment segment) {
+        this.segment = segment;
+        this.arrayID = inputArrayID;
+    }
+
     public SlicingAllocator(MemorySegment segment) {
         this.segment = segment;
+        this.arrayID = -1;
     }
 
     public long currentOffset() {
@@ -71,8 +79,13 @@ public final class SlicingAllocator implements SegmentAllocator {
         return trySlice(byteSize, byteAlignment);
     }
 
-    public final void checkSegment(int idNum) {
+    public final int checkSegment(int idNum) {
         dummyLong += idNum;
         dummyLong += ((AbstractMemorySegmentImpl)segment).intObj.intValue();
+        return idNum;
+    }
+
+    public final MemorySegment getSegment() {
+        return segment;
     }
 }
