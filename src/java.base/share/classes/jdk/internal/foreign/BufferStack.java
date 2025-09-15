@@ -122,7 +122,7 @@ public final class BufferStack {
 
         @ForceInline
         public Arena pushFrame(long size, long byteAlignment) {
-            stack.checkSegment(0xFEFE0010);
+            checkSegment(0xFEFE0010);
             boolean needsLock = Thread.currentThread().isVirtual() && !lock.isHeldByCurrentThread();
             if (needsLock && !lock.tryLock()) {
                 // Rare: another virtual thread on the same carrier competed for acquisition.
