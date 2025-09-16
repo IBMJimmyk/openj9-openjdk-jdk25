@@ -114,11 +114,7 @@ public final class BufferStack {
     private record PerThread(ReentrantLock lock,
                              Arena arena,
                              SlicingAllocator stack,
-                             CleanupAction cleanupAction,
-                             long[] carrierThreadHistory,
-                             long[] virtualThreadHistory,
-                             int[] locationHistory,
-                             int[] historyIndex) {
+                             CleanupAction cleanupAction) {
 
         @ForceInline
         public Arena pushFrame(long size, long byteAlignment) {
@@ -136,10 +132,6 @@ public final class BufferStack {
         }
 
         public void checkSegment(int idNum) {
-            carrierThreadHistory[historyIndex[0] & 0x3FF] = Thread.currentCarrierThread().threadId();
-            virtualThreadHistory[historyIndex[0] & 0x3FF] = Thread.currentThread().threadId();
-            locationHistory[historyIndex[0] & 0x3FF] = idNum;
-            historyIndex[0]++;
             stack.checkSegment(idNum);
         }
 
@@ -150,16 +142,10 @@ public final class BufferStack {
             slicingAllocatorObj.checkSegment(0xFEFE0011);
             allocatorArray[saveID & 0xFFFF] = slicingAllocatorObj;
             segmentArray[saveID & 0xFFFF]   = slicingAllocatorObj.getSegment();
-            int[] historyIndexObj = new int[1];
-            historyIndexObj[0] = 0;
             return new PerThread(new ReentrantLock(),
                     arena,
                     slicingAllocatorObj,
-                    new CleanupAction(arena),
-                    new long[1024],
-                    new long[1024],
-                    new int[1024],
-                    historyIndexObj);
+                    new CleanupAction(arena));
         }
 
         private record CleanupAction(Arena arena) implements Consumer<MemorySegment> {
