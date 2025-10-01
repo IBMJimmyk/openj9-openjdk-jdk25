@@ -68,4 +68,8 @@ public final class SlicingAllocator implements SegmentAllocator {
         // try to slice from current segment first...
         return trySlice(byteSize, byteAlignment);
     }
+
+    public final void checkSegment() {
+        ((AbstractMemorySegmentImpl)segment).intObj.intValue();
+    }
 }

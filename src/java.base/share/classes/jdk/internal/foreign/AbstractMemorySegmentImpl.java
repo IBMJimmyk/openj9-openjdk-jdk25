@@ -77,11 +77,15 @@ public abstract sealed class AbstractMemorySegmentImpl
     final boolean readOnly;
     final MemorySessionImpl scope;
 
+    public final Integer intObj;
+
     @ForceInline
     AbstractMemorySegmentImpl(long length, boolean readOnly, MemorySessionImpl scope) {
         this.length = length;
         this.readOnly = readOnly;
         this.scope = scope;
+
+        this.intObj = Integer.valueOf(1024);
     }
 
     abstract AbstractMemorySegmentImpl dup(long offset, long size, boolean readOnly, MemorySessionImpl scope);
@@ -168,13 +172,21 @@ public abstract sealed class AbstractMemorySegmentImpl
             public void run() {
                 cleanup().accept(SegmentFactories.makeNativeSegmentUnchecked(address(), newSize()));
             }
+
+            public int checkCleanup() {
+                return cleanup.hashCode();
+            }
         }
 
-        return cleanup != null
+        CleanupAction returnCleanupAction = (cleanup != null)
                 // Use a record (which is always static) instead of a lambda to avoid
                 // capturing and to enable early use in the init sequence.
                 ? new CleanupAction(address, newSize, cleanup)
                 : null;
+
+        returnCleanupAction.checkCleanup();
+
+        return returnCleanupAction;
     }
 
     private AbstractMemorySegmentImpl asSliceNoCheck(long offset, long newSize) {
