@@ -53,15 +53,10 @@ public class TestBufferStackStress {
                         for (int i = 0; i < 1_000_000; i++) {
                             try (Arena arena = stack.pushFrame(JAVA_LONG.byteSize(), JAVA_LONG.byteAlignment())) {
                                 // Try to assert no two vThreads get allocated the same stack space.
-                                //stack.checkSegment(0xFEFE0001);
                                 MemorySegment segment = arena.allocate(JAVA_LONG);
-                                //stack.checkSegment(0xFEFE0002);
                                 JAVA_LONG.varHandle().setVolatile(segment, 0L, threadId);
-                                //stack.checkSegment(0xFEFE0003);
                                 assertEquals(threadId, (long) JAVA_LONG.varHandle().getVolatile(segment, 0L));
-                                //stack.checkSegment(0xFEFE0004);
                             }
-                            //stack.checkSegment(0xFEFE0005);
                         }
                         Thread.yield(); // make sure the driver thread gets a chance.
                     }
