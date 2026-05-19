@@ -3525,7 +3525,7 @@ public final class String
      * @param   tgtStr    the characters being searched for.
      * @param   fromIndex the index to begin searching from.
      */
-    static int indexOf(byte[] src, byte srcCoder, int srcCount,
+    public static int indexOf(byte[] src, byte srcCoder, int srcCount,
                        String tgtStr, int fromIndex) {
         fromIndex = Math.clamp(fromIndex, 0, srcCount);
         int tgtCount = tgtStr.length();

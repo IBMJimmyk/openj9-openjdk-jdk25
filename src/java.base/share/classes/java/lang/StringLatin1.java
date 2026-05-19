@@ -40,7 +40,7 @@ import static java.lang.String.UTF16;
 import static java.lang.String.checkIndex;
 import static java.lang.String.checkOffset;
 
-final class StringLatin1 {
+public final class StringLatin1 {
     public static char charAt(byte[] value, int index) {
         checkIndex(index, value.length);
         return (char)(value[index] & 0xff);
